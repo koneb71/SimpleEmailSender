@@ -1,0 +1,51 @@
+{% extends 'app/base.html' %}
+{% load staticfiles %}
+{% load from_unix %}
+{% block title %}
+    History
+{% endblock %}
+
+{% block content %}
+    <h3>History From Recipient: {{ recipient }}</h3>
+{#    {{ logs }}#}
+    <hr>
+
+    <table class="table table-sm">
+        <thead>
+        <tr>
+            <th scope="col">Email</th>
+            <th scope="col">Subject</th>
+            <th scope="col">Timestamp</th>
+            <th scope="col">Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in logs.items %}
+            <tr>
+                <td>{{ item.message.headers.to }}</td>
+                <td>{{ item.message.headers.subject }}</td>
+                <td>{{ item.timestamp|fromunix|date:"D, d M Y H:i" }}</td>
+                <td>
+                    {% if item.event == 'rejected' %}
+                        <span class="badge badge-pill badge-danger">{{ item.event }}</span>
+                    {% elif item.event == 'delivered' %}
+                        <span class="badge badge-pill badge-success">{{ item.event }}</span>
+                    {% else %}
+                        <span class="badge badge-pill badge-primary">{{ item.event }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <nav aria-label="Pagination" class="float-right">
+      <ul class="pagination">
+        {% if request.GET.url %}
+        <li class="page-item"><a class="page-link" href="{% url 'history' %}?url={{ logs.paging.previous }}">Previous</a></li>
+        {% else %}
+        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+        {% endif %}
+        <li class="page-item"><a class="page-link" href="{% url 'history' %}?url={{ logs.paging.next }}">Next</a></li>
+      </ul>
+    </nav>
+{% endblock %}
